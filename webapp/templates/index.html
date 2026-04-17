@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FloodWatch | Tamil Nadu Flood Prediction</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Ambient Background -->
+    <div class="ambient-bg"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+            </div>
+            <span class="brand-text">FloodWatch</span>
+        </div>
+        <div class="nav-links">
+            <a href="#dashboard" class="nav-link active">Dashboard</a>
+            <a href="#analysis" class="nav-link">Analysis</a>
+            <a href="#about" class="nav-link">About</a>
+        </div>
+        <div class="nav-status">
+            <span class="status-dot"></span>
+            <span class="status-text">Live</span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="title-gradient">AI-Powered</span> Flood Risk Prediction
+            </h1>
+            <p class="hero-subtitle">Real-time flood risk assessment for Tamil Nadu districts using advanced machine learning models</p>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="total-records">-</span>
+                    <span class="stat-label">Data Points</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-value">6</span>
+                    <span class="stat-label">Districts</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-value">4</span>
+                    <span class="stat-label">ML Models</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard" id="dashboard">
+        <!-- Risk Overview Cards -->
+        <section class="risk-overview">
+            <div class="section-header">
+                <h2 class="section-title">District Risk Overview</h2>
+                <button class="refresh-btn" id="refresh-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                    <span>Refresh</span>
+                </button>
+            </div>
+
+            <div class="district-grid" id="district-grid">
+                <!-- District cards will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Detailed Analysis Panel -->
+        <section class="analysis-panel" id="analysis">
+            <div class="panel-header">
+                <h2 class="section-title">Detailed Analysis</h2>
+                <select class="district-select" id="district-select">
+                    <option value="">Select District</option>
+                    {% for district in districts %}
+                    <option value="{{ district }}">{{ district }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="analysis-content" id="analysis-content">
+                <div class="placeholder-message">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M9 19v-6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2zm0 0V9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v10m-6 0a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2m0 0V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2z"/>
+                    </svg>
+                    <p>Select a district to view detailed analysis</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Model Performance Section -->
+        <section class="model-section">
+            <h2 class="section-title">Model Ensemble</h2>
+            <div class="model-grid">
+                <div class="model-card">
+                    <div class="model-icon transformer">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                        </svg>
+                    </div>
+                    <h3>Transformer</h3>
+                    <p>Multi-head attention mechanism for temporal pattern recognition</p>
+                    <span class="model-badge">Attention-Based</span>
+                </div>
+                <div class="model-card">
+                    <div class="model-icon lstm">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </div>
+                    <h3>LSTM</h3>
+                    <p>Long short-term memory for sequential flood pattern learning</p>
+                    <span class="model-badge">Sequential</span>
+                </div>
+                <div class="model-card">
+                    <div class="model-icon xgboost">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <h3>XGBoost</h3>
+                    <p>Gradient boosting for high-accuracy predictions</p>
+                    <span class="model-badge">Gradient Boosting</span>
+                </div>
+                <div class="model-card">
+                    <div class="model-icon rf">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <h3>Random Forest</h3>
+                    <p>Calibrated ensemble for probability estimation</p>
+                    <span class="model-badge">Ensemble</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- About Section -->
+    <section class="about-section" id="about">
+        <div class="about-content">
+            <h2>About FloodWatch</h2>
+            <p>FloodWatch is an AI-powered flood risk prediction system designed for Tamil Nadu's coastal districts. Using a decade of historical weather and soil data, our ensemble of machine learning models provides accurate, real-time flood risk assessments.</p>
+            <div class="tech-stack">
+                <span class="tech-tag">TensorFlow</span>
+                <span class="tech-tag">XGBoost</span>
+                <span class="tech-tag">scikit-learn</span>
+                <span class="tech-tag">Python</span>
+                <span class="tech-tag">Flask</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2026 FloodWatch. AI-Powered Flood Risk Prediction System.</p>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loader">
+            <div class="loader-ring"></div>
+            <span>Analyzing...</span>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
+

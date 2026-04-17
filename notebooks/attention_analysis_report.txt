@@ -1,0 +1,59 @@
+
+## Attention Analysis Summary
+
+### Model Information
+- Model: Transformer-based Flood Prediction
+- Time Steps: 14
+- Features: 8
+- Attention Heads: Unknown
+
+### Data Summary
+- Total Samples (Chengalpattu): 3640
+- Flood Events: 0
+- Non-Flood Events: 3640
+- Date Range: 2015-01-14 00:00:00 to 2024-12-31 00:00:00
+
+### Analysis Completed
+✅ Priority 1: Multi-Head Attention Specialization
+✅ Priority 2: Feature-Level Importance Analysis
+✅ Priority 3: District-Level Attention Comparison
+✅ Priority 4: Statistical Attention Metrics
+✅ Priority 5: Attention Heatmap Visualization
+
+### Key Findings (Check notebook outputs above)
+
+1. MULTI-HEAD ATTENTION:
+   - Number of heads: 2
+   - Head specialization: [Review plots above]
+   - Peak attention days per head: [See analysis]
+
+2. FEATURE IMPORTANCE:
+   - Top feature: surface_pressure_mean
+   - Top 3 features: [surface_pressure_mean, cloud_cover_mean, rainfall_mm]
+
+3. DISTRICT PATTERNS:
+   - Districts analyzed: ['Chengalpattu', 'Chennai', 'Cuddalore', 'Kancheepuram', 'Nagapattinam', 'Tiruvallur']
+   - Regional differences: [See comparison plots]
+
+4. ATTENTION METRICS:
+   - Flood entropy (mean): 2.502
+   - Non-flood entropy (mean): 2.628
+   - Statistically significant metrics: [Check t-test results above]
+
+5. ATTENTION STRUCTURE:
+   - Pattern type: [Check heatmap - diagonal/global/block]
+   - Flood vs non-flood differences: [See difference heatmap]
+
+### Next Steps
+- Save important figures using plt.savefig()
+- Document key findings in markdown cells
+- Prepare figures for paper/presentation
+- Consider additional analyses based on findings
+
+### Files Generated
+- Enhanced notebook: attention_analysis.ipynb
+- Analysis guide: ANALYSIS_GUIDE.md
+- Figures directory: ../figures/attention_analysis
+
+---
+Report generated: 2026-04-15 10:18:35.445403
