@@ -14,7 +14,13 @@ from flask import Flask, render_template, jsonify, request
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import tensorflow as tf
+try:
+    import tensorflow as tf
+    TF_AVAILABLE = True
+except ImportError:
+    tf = None
+    TF_AVAILABLE = False
+
 from todays_conditions import (
     get_today_sequence, get_today_features, get_today_conditions_dict,
     update_conditions, TRANSFORMER_FEATURES, XGBOOST_FEATURES
@@ -22,7 +28,8 @@ from todays_conditions import (
 
 # Suppress TensorFlow warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-tf.get_logger().setLevel('ERROR')
+if TF_AVAILABLE:
+    tf.get_logger().setLevel('ERROR')
 
 app = Flask(__name__)
 
@@ -71,25 +78,35 @@ TIME_STEPS = 14
 loaded_models = {}
 loaded_scalers = {}
 
+
+def get_tabular_model_input(model_key, latest_data, default_features):
+    """Build a single-row DataFrame in the feature order expected by a model."""
+    model = loaded_models[model_key]
+    X = latest_data[default_features].iloc[-1:].copy()
+    expected_features = list(getattr(model, 'feature_names_in_', X.columns))
+    return X[expected_features]
+
 def load_all_models():
     """Load all trained models"""
     global loaded_models, loaded_scalers
 
-    # Load Transformer
-    try:
-        loaded_models['transformer'] = tf.keras.models.load_model(MODELS['transformer']['model_path'])
-        loaded_scalers['transformer'] = joblib.load(MODELS['transformer']['scaler_path'])
-        print("[OK] Transformer model loaded")
-    except Exception as e:
-        print(f"[WARN] Transformer model not loaded: {e}")
+    # TensorFlow-backed models are optional so the dashboard can still start.
+    if TF_AVAILABLE:
+        try:
+            loaded_models['transformer'] = tf.keras.models.load_model(MODELS['transformer']['model_path'])
+            loaded_scalers['transformer'] = joblib.load(MODELS['transformer']['scaler_path'])
+            print("[OK] Transformer model loaded")
+        except Exception as e:
+            print(f"[WARN] Transformer model not loaded: {e}")
 
-    # Load LSTM
-    try:
-        loaded_models['lstm'] = tf.keras.models.load_model(MODELS['lstm']['model_path'])
-        loaded_scalers['lstm'] = joblib.load(MODELS['lstm']['scaler_path'])
-        print("[OK] LSTM model loaded")
-    except Exception as e:
-        print(f"[WARN] LSTM model not loaded: {e}")
+        try:
+            loaded_models['lstm'] = tf.keras.models.load_model(MODELS['lstm']['model_path'])
+            loaded_scalers['lstm'] = joblib.load(MODELS['lstm']['scaler_path'])
+            print("[OK] LSTM model loaded")
+        except Exception as e:
+            print(f"[WARN] LSTM model not loaded: {e}")
+    else:
+        print("[WARN] TensorFlow not installed; skipping Transformer and LSTM models")
 
     # Load XGBoost
     try:
@@ -101,6 +118,11 @@ def load_all_models():
     # Load Random Forest
     try:
         loaded_models['random_forest'] = joblib.load(MODELS['random_forest']['model_path'])
+        if hasattr(loaded_models['random_forest'], 'estimator'):
+            loaded_models['random_forest'].estimator.n_jobs = 1
+        for calibrated_model in getattr(loaded_models['random_forest'], 'calibrated_classifiers_', []):
+            if hasattr(calibrated_model, 'estimator'):
+                calibrated_model.estimator.n_jobs = 1
         print("[OK] Random Forest model loaded")
     except Exception as e:
         print(f"[WARN] Random Forest model not loaded: {e}")
@@ -154,20 +176,20 @@ def predict_flood_risk(district):
     # XGBoost prediction (uses 15 flat features, today's values only)
     if 'xgboost' in loaded_models:
         try:
-            X_xgb = latest_data[XGBOOST_FEATURES].iloc[-1:].values
+            X_xgb = get_tabular_model_input('xgboost', latest_data, XGBOOST_FEATURES)
             prob = loaded_models['xgboost'].predict_proba(X_xgb)[0][1]
             predictions['xgboost'] = float(prob)
-        except:
-            pass
+        except Exception as e:
+            print(f"[WARN] XGBoost prediction failed for {district}: {e}")
 
     # Random Forest prediction (uses 15 flat features, today's values only)
     if 'random_forest' in loaded_models:
         try:
-            X_rf = latest_data[XGBOOST_FEATURES].iloc[-1:].values
+            X_rf = get_tabular_model_input('random_forest', latest_data, XGBOOST_FEATURES)
             prob = loaded_models['random_forest'].predict_proba(X_rf)[0][1]
             predictions['random_forest'] = float(prob)
-        except:
-            pass
+        except Exception as e:
+            print(f"[WARN] Random Forest prediction failed for {district}: {e}")
 
     # Ensemble average
     if predictions:
@@ -315,5 +337,5 @@ if __name__ == '__main__':
     print("Starting server at http://localhost:5000")
     print("="*60 + "\n")
 
-    app.run(debug=True, port=5000)
+    app.run(debug=False, use_reloader=False, port=5000)
 
